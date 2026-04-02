@@ -35,7 +35,7 @@ export function PlayerPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="fixed inset-0 flex items-center justify-center bg-surface">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     )
@@ -43,7 +43,7 @@ export function PlayerPage() {
 
   if (error) {
     return (
-      <div className="flex h-full items-center justify-center px-4">
+      <div className="fixed inset-0 flex items-center justify-center bg-surface px-4">
         <div className="rounded-xl bg-error/10 p-6 text-center text-error">
           {error}
         </div>
@@ -52,7 +52,7 @@ export function PlayerPage() {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="fixed inset-0 flex flex-col bg-surface text-text">
       <SongHeader
         trackName={track?.trackName ?? ''}
         artistName={track?.artistName ?? ''}
