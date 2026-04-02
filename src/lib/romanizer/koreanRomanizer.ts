@@ -1,11 +1,15 @@
-// Prevent aromanize from accessing document.currentScript.src
-// (crashes in ES module context where currentScript is null)
-// @ts-expect-error global flag to skip String.prototype extension
-globalThis.AROMANIZE_EXTEND_STRING = false
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let Aromanize: any = null
 
-// @ts-expect-error aromanize has no type declarations
-import Aromanize from 'aromanize'
+async function loadAromanize() {
+  if (Aromanize) return
+  // Set flag BEFORE loading to prevent document.currentScript.src crash
+  ;(globalThis as Record<string, unknown>).AROMANIZE_EXTEND_STRING = false
+  // @ts-expect-error aromanize has no type declarations
+  Aromanize = (await import('aromanize')).default
+}
 
-export function romanizeKorean(text: string): string {
+export async function romanizeKorean(text: string): Promise<string> {
+  await loadAromanize()
   return Aromanize.toLatin(text) as string
 }
