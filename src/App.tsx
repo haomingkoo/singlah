@@ -6,7 +6,7 @@ import { SavedPage } from './pages/SavedPage'
 
 export default function App() {
   return (
-    <BrowserRouter basename="/singlah">
+    <BrowserRouter>
       <Routes>
         <Route element={<AppShell />}>
           <Route index element={<SearchPage />} />
