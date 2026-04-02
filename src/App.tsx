@@ -10,9 +10,9 @@ export default function App() {
       <Routes>
         <Route element={<AppShell />}>
           <Route index element={<SearchPage />} />
-          <Route path="play/:songId" element={<PlayerPage />} />
           <Route path="saved" element={<SavedPage />} />
         </Route>
+        <Route path="play/:songId" element={<PlayerPage />} />
       </Routes>
     </BrowserRouter>
   )
