@@ -3,6 +3,7 @@ import { useLyrics } from '../hooks/useLyrics'
 import { useRomanizer } from '../hooks/useRomanizer'
 import { useKaraokeSync } from '../hooks/useKaraokeSync'
 import { useOfflineSongs } from '../hooks/useOfflineSongs'
+import { useDisplayMode } from '../hooks/useDisplayMode'
 import { SongHeader } from '../components/player/SongHeader'
 import { LyricsScroller } from '../components/player/LyricsScroller'
 import { PlayerControls } from '../components/player/PlayerControls'
@@ -15,6 +16,7 @@ export function PlayerPage() {
   const { lines, isRomanizing, japaneseLoading } = useRomanizer(rawLines)
   const sync = useKaraokeSync(lines, track?.duration ?? 0)
   const { isSaved, save, remove } = useOfflineSongs()
+  const { mode: displayMode, cycle: cycleDisplayMode } = useDisplayMode()
 
   const handleToggleSave = async () => {
     if (!track) return
@@ -69,16 +71,22 @@ export function PlayerPage() {
         </div>
       )}
 
-      <LyricsScroller lines={lines} currentLineIndex={sync.currentLineIndex} />
+      <LyricsScroller
+        lines={lines}
+        currentLineIndex={sync.currentLineIndex}
+        displayMode={displayMode}
+      />
 
       <PlayerControls
         isPlaying={sync.isPlaying}
         elapsedTime={sync.elapsedTime}
         duration={track?.duration ?? 0}
         playbackRate={sync.playbackRate}
+        displayMode={displayMode}
         onTogglePlay={sync.togglePlay}
         onSeek={sync.seek}
         onSetPlaybackRate={sync.setPlaybackRate}
+        onCycleDisplayMode={cycleDisplayMode}
       />
     </div>
   )

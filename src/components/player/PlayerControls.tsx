@@ -1,3 +1,4 @@
+import type { DisplayMode } from '../../types'
 import { cn } from '../../utils/cn'
 
 interface PlayerControlsProps {
@@ -5,12 +6,21 @@ interface PlayerControlsProps {
   elapsedTime: number
   duration: number
   playbackRate: number
+  displayMode: DisplayMode
   onTogglePlay: () => void
   onSeek: (time: number) => void
   onSetPlaybackRate: (rate: number) => void
+  onCycleDisplayMode: () => void
 }
 
 const RATES = [0.5, 0.75, 1.0, 1.25]
+
+const DISPLAY_LABELS: Record<DisplayMode, string> = {
+  both: 'A+a',
+  original: 'A',
+  romanized: 'a',
+  ruby: 'Aᵃ',
+}
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60)
@@ -23,9 +33,11 @@ export function PlayerControls({
   elapsedTime,
   duration,
   playbackRate,
+  displayMode,
   onTogglePlay,
   onSeek,
   onSetPlaybackRate,
+  onCycleDisplayMode,
 }: PlayerControlsProps) {
   const nextRate = RATES[(RATES.indexOf(playbackRate) + 1) % RATES.length]
 
@@ -51,7 +63,7 @@ export function PlayerControls({
       </div>
 
       {/* Controls */}
-      <div className="flex items-center justify-center gap-6 pb-2">
+      <div className="flex items-center justify-center gap-4 pb-2">
         <button
           onClick={() => onSetPlaybackRate(nextRate)}
           className={cn(
@@ -62,6 +74,14 @@ export function PlayerControls({
           )}
         >
           {playbackRate}x
+        </button>
+
+        <button
+          onClick={onCycleDisplayMode}
+          className="rounded-lg px-2 py-1 text-xs font-medium text-text-dim hover:text-text"
+          title={`Display: ${displayMode}`}
+        >
+          {DISPLAY_LABELS[displayMode]}
         </button>
 
         <button
@@ -79,6 +99,9 @@ export function PlayerControls({
         >
           <RestartIcon />
         </button>
+
+        {/* Placeholder for future buttons (pitch, party) */}
+        <div className="w-8" />
       </div>
     </div>
   )
