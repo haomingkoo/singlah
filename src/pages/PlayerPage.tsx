@@ -1,12 +1,15 @@
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useLyrics } from '../hooks/useLyrics'
 import { useRomanizer } from '../hooks/useRomanizer'
 import { useKaraokeSync } from '../hooks/useKaraokeSync'
 import { useOfflineSongs } from '../hooks/useOfflineSongs'
 import { useDisplayMode } from '../hooks/useDisplayMode'
+import { usePitchDetection } from '../hooks/usePitchDetection'
 import { SongHeader } from '../components/player/SongHeader'
 import { LyricsScroller } from '../components/player/LyricsScroller'
 import { PlayerControls } from '../components/player/PlayerControls'
+import { PitchVisualizer } from '../components/player/PitchVisualizer'
 
 export function PlayerPage() {
   const { songId } = useParams<{ songId: string }>()
@@ -17,6 +20,8 @@ export function PlayerPage() {
   const sync = useKaraokeSync(lines, track?.duration ?? 0)
   const { isSaved, save, remove } = useOfflineSongs()
   const { mode: displayMode, cycle: cycleDisplayMode } = useDisplayMode()
+  const [pitchEnabled, setPitchEnabled] = useState(false)
+  const { pitchData } = usePitchDetection(pitchEnabled)
 
   const handleToggleSave = async () => {
     if (!track) return
@@ -77,16 +82,20 @@ export function PlayerPage() {
         displayMode={displayMode}
       />
 
+      {pitchEnabled && <PitchVisualizer pitchData={pitchData} />}
+
       <PlayerControls
         isPlaying={sync.isPlaying}
         elapsedTime={sync.elapsedTime}
         duration={track?.duration ?? 0}
         playbackRate={sync.playbackRate}
         displayMode={displayMode}
+        pitchEnabled={pitchEnabled}
         onTogglePlay={sync.togglePlay}
         onSeek={sync.seek}
         onSetPlaybackRate={sync.setPlaybackRate}
         onCycleDisplayMode={cycleDisplayMode}
+        onTogglePitch={() => setPitchEnabled((p) => !p)}
       />
     </div>
   )

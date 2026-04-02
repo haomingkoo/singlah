@@ -7,10 +7,12 @@ interface PlayerControlsProps {
   duration: number
   playbackRate: number
   displayMode: DisplayMode
+  pitchEnabled: boolean
   onTogglePlay: () => void
   onSeek: (time: number) => void
   onSetPlaybackRate: (rate: number) => void
   onCycleDisplayMode: () => void
+  onTogglePitch: () => void
 }
 
 const RATES = [0.5, 0.75, 1.0, 1.25]
@@ -34,10 +36,12 @@ export function PlayerControls({
   duration,
   playbackRate,
   displayMode,
+  pitchEnabled,
   onTogglePlay,
   onSeek,
   onSetPlaybackRate,
   onCycleDisplayMode,
+  onTogglePitch,
 }: PlayerControlsProps) {
   const nextRate = RATES[(RATES.indexOf(playbackRate) + 1) % RATES.length]
 
@@ -100,8 +104,18 @@ export function PlayerControls({
           <RestartIcon />
         </button>
 
-        {/* Placeholder for future buttons (pitch, party) */}
-        <div className="w-8" />
+        <button
+          onClick={onTogglePitch}
+          className={cn(
+            'rounded-lg p-2 transition-colors',
+            pitchEnabled
+              ? 'bg-accent/20 text-accent'
+              : 'text-text-dim hover:text-text'
+          )}
+          aria-label={pitchEnabled ? 'Disable pitch' : 'Enable pitch'}
+        >
+          <MicIcon />
+        </button>
       </div>
     </div>
   )
@@ -119,6 +133,16 @@ function PauseIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7">
       <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+    </svg>
+  )
+}
+
+function MicIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" x2="12" y1="19" y2="22" />
     </svg>
   )
 }
