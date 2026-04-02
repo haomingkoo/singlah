@@ -6,10 +6,12 @@ import { useKaraokeSync } from '../hooks/useKaraokeSync'
 import { useOfflineSongs } from '../hooks/useOfflineSongs'
 import { useDisplayMode } from '../hooks/useDisplayMode'
 import { usePitchDetection } from '../hooks/usePitchDetection'
+import { usePartyMode } from '../hooks/usePartyMode'
 import { SongHeader } from '../components/player/SongHeader'
 import { LyricsScroller } from '../components/player/LyricsScroller'
 import { PlayerControls } from '../components/player/PlayerControls'
 import { PitchVisualizer } from '../components/player/PitchVisualizer'
+import { PartyPanel } from '../components/player/PartyPanel'
 
 export function PlayerPage() {
   const { songId } = useParams<{ songId: string }>()
@@ -22,6 +24,8 @@ export function PlayerPage() {
   const { mode: displayMode, cycle: cycleDisplayMode } = useDisplayMode()
   const [pitchEnabled, setPitchEnabled] = useState(false)
   const { pitchData } = usePitchDetection(pitchEnabled)
+  const party = usePartyMode()
+  const [showPartyPanel, setShowPartyPanel] = useState(false)
 
   const handleToggleSave = async () => {
     if (!track) return
@@ -76,6 +80,14 @@ export function PlayerPage() {
         </div>
       )}
 
+      {party.isInParty && (
+        <div className="flex items-center justify-center gap-2 border-b border-surface-alt py-1.5 text-xs">
+          <span className="text-primary">Room {party.roomCode}</span>
+          <span className="text-text-dim">·</span>
+          <span className="text-text-dim">{party.connectedCount} connected</span>
+        </div>
+      )}
+
       <LyricsScroller
         lines={lines}
         currentLineIndex={sync.currentLineIndex}
@@ -91,12 +103,21 @@ export function PlayerPage() {
         playbackRate={sync.playbackRate}
         displayMode={displayMode}
         pitchEnabled={pitchEnabled}
+        partyActive={party.isInParty}
         onTogglePlay={sync.togglePlay}
         onSeek={sync.seek}
         onSetPlaybackRate={sync.setPlaybackRate}
         onCycleDisplayMode={cycleDisplayMode}
         onTogglePitch={() => setPitchEnabled((p) => !p)}
+        onOpenParty={() => setShowPartyPanel(true)}
       />
+
+      {showPartyPanel && (
+        <PartyPanel
+          party={party}
+          onClose={() => setShowPartyPanel(false)}
+        />
+      )}
     </div>
   )
 }

@@ -8,11 +8,13 @@ interface PlayerControlsProps {
   playbackRate: number
   displayMode: DisplayMode
   pitchEnabled: boolean
+  partyActive: boolean
   onTogglePlay: () => void
   onSeek: (time: number) => void
   onSetPlaybackRate: (rate: number) => void
   onCycleDisplayMode: () => void
   onTogglePitch: () => void
+  onOpenParty: () => void
 }
 
 const RATES = [0.5, 0.75, 1.0, 1.25]
@@ -37,11 +39,13 @@ export function PlayerControls({
   playbackRate,
   displayMode,
   pitchEnabled,
+  partyActive,
   onTogglePlay,
   onSeek,
   onSetPlaybackRate,
   onCycleDisplayMode,
   onTogglePitch,
+  onOpenParty,
 }: PlayerControlsProps) {
   const nextRate = RATES[(RATES.indexOf(playbackRate) + 1) % RATES.length]
 
@@ -107,7 +111,7 @@ export function PlayerControls({
         <button
           onClick={onTogglePitch}
           className={cn(
-            'rounded-lg p-2 transition-colors',
+            'rounded-lg p-1.5 transition-colors',
             pitchEnabled
               ? 'bg-accent/20 text-accent'
               : 'text-text-dim hover:text-text'
@@ -115,6 +119,19 @@ export function PlayerControls({
           aria-label={pitchEnabled ? 'Disable pitch' : 'Enable pitch'}
         >
           <MicIcon />
+        </button>
+
+        <button
+          onClick={onOpenParty}
+          className={cn(
+            'rounded-lg p-1.5 transition-colors',
+            partyActive
+              ? 'bg-primary/20 text-primary'
+              : 'text-text-dim hover:text-text'
+          )}
+          aria-label="Party mode"
+        >
+          <PartyIcon />
         </button>
       </div>
     </div>
@@ -143,6 +160,17 @@ function MicIcon() {
       <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
       <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
       <line x1="12" x2="12" y1="19" y2="22" />
+    </svg>
+  )
+}
+
+function PartyIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   )
 }
