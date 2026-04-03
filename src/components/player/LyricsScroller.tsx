@@ -7,12 +7,16 @@ interface LyricsScrollerProps {
   lines: TimedLine[]
   currentLineIndex: number
   displayMode: DisplayMode
+  elapsedTime: number
+  isPlaying: boolean
 }
 
 export function LyricsScroller({
   lines,
   currentLineIndex,
   displayMode,
+  elapsedTime,
+  isPlaying,
 }: LyricsScrollerProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const lineRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -76,6 +80,15 @@ export function LyricsScroller({
       className="flex-1 overflow-y-auto scroll-smooth"
     >
       <div className="py-[33vh]">
+        {/* Countdown before first lyric */}
+        {isPlaying && lines.length > 0 && currentLineIndex < 0 && (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-lg text-text-dim">Lyrics start in</p>
+            <p className="mt-2 text-5xl font-bold text-primary">
+              {Math.ceil(lines[0].time - elapsedTime)}
+            </p>
+          </div>
+        )}
         {lines.map((line, i) => (
           <div
             key={i}

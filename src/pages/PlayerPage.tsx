@@ -92,6 +92,8 @@ export function PlayerPage() {
         lines={lines}
         currentLineIndex={sync.currentLineIndex}
         displayMode={displayMode}
+        elapsedTime={sync.elapsedTime}
+        isPlaying={sync.isPlaying}
       />
 
       {pitchEnabled && <PitchVisualizer pitchData={pitchData} />}
