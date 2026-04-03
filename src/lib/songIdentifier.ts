@@ -7,7 +7,10 @@ export interface IdentifiedSong {
 export async function identifySong(
   audioBuffer: AudioBuffer
 ): Promise<IdentifiedSong | null> {
-  const { fingerprintFromSamples } = await import('rusty-chromaprint-wasm')
+  // Load from public/ to avoid Vite WASM bundling issues
+  const { fingerprintFromSamples } = await import(
+    /* @vite-ignore */ `${import.meta.env.BASE_URL}rusty_chromaprint_wasm.js`
+  )
 
   // Convert to mono Int16Array
   const channelData = audioBuffer.getChannelData(0)
