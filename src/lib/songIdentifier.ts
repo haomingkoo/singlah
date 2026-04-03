@@ -43,10 +43,14 @@ export async function identifySong(
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
   })
-  if (!res.ok) throw new Error(`AcoustID lookup failed: ${res.status}`)
 
   const data = await res.json()
-  if (data.status !== 'ok' || !data.results?.length) return null
+
+  if (data.status === 'error') {
+    throw new Error(data.error?.message ?? 'AcoustID lookup failed')
+  }
+
+  if (!data.results?.length) return null
 
   const best = data.results[0]
   if (!best.recordings?.length) return null
