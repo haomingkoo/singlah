@@ -31,14 +31,18 @@ export async function identifySong(
     throw new Error('AcoustID API key not configured')
   }
 
-  const params = new URLSearchParams({
+  const body = new URLSearchParams({
     client: apiKey,
     duration: String(duration),
     fingerprint,
     meta: 'recordings',
   })
 
-  const res = await fetch(`https://api.acoustid.org/v2/lookup?${params}`)
+  const res = await fetch('https://api.acoustid.org/v2/lookup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  })
   if (!res.ok) throw new Error(`AcoustID lookup failed: ${res.status}`)
 
   const data = await res.json()
