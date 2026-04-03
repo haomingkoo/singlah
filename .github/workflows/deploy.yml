@@ -27,11 +27,10 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm ci --legacy-peer-deps
-        env:
-          VITE_ACOUSTID_API_KEY: ${{ secrets.VITE_ACOUSTID_API_KEY }} --legacy-peer-deps
       - run: npm run build
         env:
           VITE_ACOUSTID_API_KEY: ${{ secrets.VITE_ACOUSTID_API_KEY }}
+          VITE_PARTY_BACKEND_URL: ${{ secrets.VITE_PARTY_BACKEND_URL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
