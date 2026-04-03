@@ -6,14 +6,6 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig({
   base: '/',
-  optimizeDeps: {
-    exclude: ['rusty-chromaprint-wasm'],
-  },
-  build: {
-    rollupOptions: {
-      external: ['rusty-chromaprint-wasm'],
-    },
-  },
   plugins: [
     react(),
     tailwindcss(),
