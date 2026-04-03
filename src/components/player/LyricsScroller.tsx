@@ -1,17 +1,28 @@
-import { useRef, useEffect, useCallback } from 'react'
-import type { TimedLine } from '../../types'
+import { useRef, useEffect, useCallback, useState } from 'react'
+import type { TimedLine, DisplayMode, RubyToken } from '../../types'
 import { LyricLine } from './LyricLine'
+import { WordPopup } from './WordPopup'
 
 interface LyricsScrollerProps {
   lines: TimedLine[]
   currentLineIndex: number
+  displayMode: DisplayMode
 }
 
-export function LyricsScroller({ lines, currentLineIndex }: LyricsScrollerProps) {
+export function LyricsScroller({
+  lines,
+  currentLineIndex,
+  displayMode,
+}: LyricsScrollerProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const lineRefs = useRef<(HTMLDivElement | null)[]>([])
   const userScrolledRef = useRef(false)
   const userScrollTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
+
+  const [popup, setPopup] = useState<{
+    token: RubyToken
+    position: { x: number; y: number }
+  } | null>(null)
 
   const handleUserScroll = useCallback(() => {
     userScrolledRef.current = true
@@ -21,6 +32,18 @@ export function LyricsScroller({ lines, currentLineIndex }: LyricsScrollerProps)
     }, 5000)
   }, [])
 
+  const handleTokenTap = useCallback(
+    (token: RubyToken, position: { x: number; y: number }) => {
+      setPopup({ token, position })
+    },
+    []
+  )
+
+  // Close popup on line change
+  useEffect(() => {
+    setPopup(null)
+  }, [currentLineIndex])
+
   useEffect(() => {
     if (currentLineIndex < 0 || userScrolledRef.current) return
     const el = lineRefs.current[currentLineIndex]
@@ -29,7 +52,6 @@ export function LyricsScroller({ lines, currentLineIndex }: LyricsScrollerProps)
 
     const targetScroll = el.offsetTop - container.clientHeight * 0.33
 
-    // Use instant scroll for rapid lines (<500ms gap)
     const prevLine = currentLineIndex > 0 ? lines[currentLineIndex - 1] : null
     const gap = prevLine
       ? lines[currentLineIndex].time - prevLine.time
@@ -42,7 +64,6 @@ export function LyricsScroller({ lines, currentLineIndex }: LyricsScrollerProps)
     })
   }, [currentLineIndex, lines])
 
-  // Reset line refs when lines change
   useEffect(() => {
     lineRefs.current = new Array(lines.length).fill(null)
   }, [lines])
@@ -66,10 +87,20 @@ export function LyricsScroller({ lines, currentLineIndex }: LyricsScrollerProps)
               line={line}
               isActive={i === currentLineIndex}
               isPast={i < currentLineIndex}
+              displayMode={displayMode}
+              onTokenTap={handleTokenTap}
             />
           </div>
         ))}
       </div>
+
+      {popup && (
+        <WordPopup
+          token={popup.token}
+          position={popup.position}
+          onClose={() => setPopup(null)}
+        />
+      )}
     </div>
   )
 }

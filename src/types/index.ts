@@ -10,12 +10,20 @@ export interface LrcLibTrack {
   syncedLyrics: string | null
 }
 
+export interface RubyToken {
+  base: string
+  annotation: string
+}
+
 export interface TimedLine {
   time: number
   text: string
   romanized?: string
   lang?: 'zh' | 'ja' | 'ko' | 'en' | 'other'
+  rubyTokens?: RubyToken[]
 }
+
+export type DisplayMode = 'both' | 'original' | 'romanized' | 'ruby'
 
 export interface SavedSong {
   id: number

@@ -1,5 +1,6 @@
 import { SearchBar } from '../components/search/SearchBar'
 import { SearchResults } from '../components/search/SearchResults'
+import { SongIdentifyButton } from '../components/search/SongIdentifyButton'
 import { useSearch } from '../hooks/useSearch'
 
 export function SearchPage() {
@@ -12,6 +13,7 @@ export function SearchPage() {
         Karaoke lyrics with romanization
       </p>
       <SearchBar value={query} onChange={search} />
+      <SongIdentifyButton onIdentified={search} />
       <div className="mt-4">
         <SearchResults
           results={results}

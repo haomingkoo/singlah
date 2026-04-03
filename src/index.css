@@ -19,6 +19,12 @@ body,
   margin: 0;
 }
 
+rt {
+  font-size: 0.5em;
+  color: var(--color-text-dim);
+  font-weight: normal;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
