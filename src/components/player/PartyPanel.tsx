@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { PartyState } from '../../hooks/usePartyMode'
+import { ROOM_CODE_LENGTH, normalizeRoomCode, type PartyState } from '../../hooks/usePartyMode'
 
 interface PartyPanelProps {
   party: PartyState & {
@@ -68,15 +68,17 @@ export function PartyPanel({ party, onClose }: PartyPanelProps) {
         <div className="flex gap-2">
           <input
             type="text"
-            maxLength={4}
+            maxLength={ROOM_CODE_LENGTH}
+            autoCapitalize="characters"
+            autoComplete="off"
             value={joinCode}
-            onChange={(e) => setJoinCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
+            onChange={(e) => setJoinCode(normalizeRoomCode(e.target.value))}
             placeholder="Room code"
             className="flex-1 rounded-lg bg-surface px-4 py-3 text-center text-lg tracking-widest text-text placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-primary"
           />
           <button
-            onClick={() => joinCode.length === 4 && party.joinRoom(joinCode)}
-            disabled={joinCode.length !== 4 || party.status === 'connecting'}
+            onClick={() => joinCode.length === ROOM_CODE_LENGTH && party.joinRoom(joinCode)}
+            disabled={joinCode.length !== ROOM_CODE_LENGTH || party.status === 'connecting'}
             className="rounded-lg bg-surface-hover px-6 py-3 text-sm font-medium text-text disabled:opacity-50"
           >
             Join

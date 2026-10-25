@@ -10,6 +10,11 @@ export interface PartyState {
 }
 
 const BACKEND_URL = import.meta.env.VITE_PARTY_BACKEND_URL || ''
+const hostTokenKey = (code: string) => `singlah-host-token:${code}`
+
+export const ROOM_CODE_LENGTH = 6
+export const normalizeRoomCode = (input: string) =>
+  input.toUpperCase().replace(/[^A-HJ-NP-Z2-9]/g, '').slice(0, ROOM_CODE_LENGTH)
 
 export function usePartyMode() {
   const [state, setState] = useState<PartyState>({
@@ -23,6 +28,13 @@ export function usePartyMode() {
   const syncHandlerRef = useRef<((data: Record<string, unknown>) => void) | null>(null)
 
   const cleanup = useCallback(() => {
+    try {
+      for (const key of Object.keys(sessionStorage)) {
+        if (key.startsWith('singlah-host-token:')) sessionStorage.removeItem(key)
+      }
+    } catch {
+      // storage unavailable
+    }
     socketRef.current?.disconnect()
     socketRef.current = null
     setState({
@@ -41,11 +53,18 @@ export function usePartyMode() {
 
     try {
       const res = await fetch(`${BACKEND_URL}/rooms`, { method: 'POST' })
-      const { code } = await res.json()
+      if (!res.ok) throw new Error('Room creation failed')
+      const { code, hostToken } = await res.json()
+      try {
+        sessionStorage.setItem(hostTokenKey(code), hostToken)
+      } catch {
+        // storage unavailable; the token is still held in memory below
+      }
 
       const socket = new PartySocket()
       const wsUrl = BACKEND_URL.replace(/^http/, 'ws') + `/ws/${code}?role=host`
       await socket.connect(wsUrl)
+      socket.send('auth', { token: hostToken })
 
       socket.on('room_joined', (data) => {
         setState((s) => ({
@@ -78,6 +97,7 @@ export function usePartyMode() {
 
       try {
         const check = await fetch(`${BACKEND_URL}/rooms/${code}`)
+        if (!check.ok) throw new Error('Room lookup failed')
         const { exists } = await check.json()
         if (!exists) {
           setState((s) => ({ ...s, status: 'error' }))
