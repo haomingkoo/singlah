@@ -74,10 +74,10 @@ hits: dict[tuple[str, str], deque[float]] = defaultdict(deque)
 
 
 def client_ip(headers: Any, peer: Any) -> str:
-    # Railway's proxy appends the real peer, so the rightmost entry can't be spoofed.
-    forwarded = headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[-1].strip()
+    # Railway's edge sets X-Real-IP; client-sent X-Forwarded-For reaches us unchanged.
+    real_ip = headers.get("x-real-ip")
+    if real_ip:
+        return real_ip.strip()
     return peer.host if peer else "unknown"
 
 
