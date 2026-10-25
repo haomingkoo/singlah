@@ -208,3 +208,8 @@ def test_spoofed_forwarded_for_does_not_bypass_limit(client: TestClient) -> None
     res = client.get("/rooms/ABCDEF", headers={"x-forwarded-for": "8.8.8.8", "x-real-ip": "5.5.5.5"})
 
     assert res.status_code == 429
+
+
+@pytest.mark.parametrize("path", ["/docs", "/redoc", "/openapi.json"])
+def test_api_docs_disabled_by_default(client: TestClient, path: str) -> None:
+    assert client.get(path).status_code == 404

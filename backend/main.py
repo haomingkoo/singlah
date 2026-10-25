@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import hmac
 import json
+import os
 import re
 import secrets
 import time
@@ -34,7 +35,14 @@ CLOSE_UNAUTHORIZED = 4401
 CLOSE_NOT_FOUND = 4404
 CLOSE_RATE_LIMITED = 4429
 
-app = FastAPI(title="SingLah Party")
+# API docs stay off unless ENABLE_DOCS=1 (local dev only).
+DOCS = os.getenv("ENABLE_DOCS") == "1"
+app = FastAPI(
+    title="SingLah Party",
+    docs_url="/docs" if DOCS else None,
+    redoc_url="/redoc" if DOCS else None,
+    openapi_url="/openapi.json" if DOCS else None,
+)
 
 app.add_middleware(
     CORSMiddleware,
