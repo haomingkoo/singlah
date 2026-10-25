@@ -1,12 +1,12 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { searchTracks } from '../lib/lrclib'
+import { searchTracks, LyricsError, type LyricsErrorKind } from '../lib/lrclib'
 import type { LrcLibTrack } from '../types'
 
 export function useSearch() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<LrcLibTrack[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<LyricsErrorKind | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
   const abortRef = useRef<AbortController>(undefined)
 
@@ -36,7 +36,7 @@ export function useSearch() {
         }
       } catch (err) {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : 'Search failed')
+          setError(err instanceof LyricsError ? err.kind : 'unavailable')
           setResults([])
         }
       } finally {
@@ -54,5 +54,7 @@ export function useSearch() {
     }
   }, [])
 
-  return { query, search, results, isLoading, error }
+  const retry = useCallback(() => search(query), [search, query])
+
+  return { query, search, retry, results, isLoading, error }
 }

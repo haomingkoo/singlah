@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { useLyrics } from '../hooks/useLyrics'
 import { useRomanizer } from '../hooks/useRomanizer'
 import { useKaraokeSync } from '../hooks/useKaraokeSync'
@@ -12,12 +12,18 @@ import { LyricsScroller } from '../components/player/LyricsScroller'
 import { PlayerControls } from '../components/player/PlayerControls'
 import { PitchVisualizer } from '../components/player/PitchVisualizer'
 import { PartyPanel } from '../components/player/PartyPanel'
+import { AppShell } from '../components/layout/AppShell'
+import { StateMessage } from '../components/StateMessage'
+import { ERROR_COPY } from '../lib/errorCopy'
+import { useBack } from '../hooks/useBack'
 
 export function PlayerPage() {
   const { songId } = useParams<{ songId: string }>()
-  const id = Number(songId)
+  const [params] = useSearchParams()
+  const id = Number(songId ?? params.get('id'))
+  const goBack = useBack()
 
-  const { track, lines: rawLines, isLoading, error } = useLyrics(id)
+  const { track, lines: rawLines, isLoading, error, retry } = useLyrics(id)
   const { lines, isRomanizing, japaneseLoading } = useRomanizer(rawLines)
   const sync = useKaraokeSync(lines, track?.duration ?? 0)
   const { isSaved, save, remove } = useOfflineSongs()
@@ -46,19 +52,45 @@ export function PlayerPage() {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-surface">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-      </div>
+      <AppShell>
+        <div className="mx-auto w-full max-w-xl px-4 pt-10" role="status">
+          <p className="text-[15px] text-text-dim">Loading lyrics…</p>
+          <div className="mt-6 flex flex-col items-center gap-5" aria-hidden="true">
+            {['w-3/4', 'w-2/3', 'w-4/5', 'w-1/2'].map((w) => (
+              <div key={w} className={`h-6 animate-pulse rounded bg-surface-alt ${w}`} />
+            ))}
+          </div>
+        </div>
+      </AppShell>
     )
   }
 
   if (error) {
+    const copy =
+      error === 'no_synced'
+        ? { title: 'This song has no synced lyrics', body: 'Search again and pick another version of the song.' }
+        : ERROR_COPY[error]
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-surface px-4">
-        <div className="rounded-xl bg-error/10 p-6 text-center text-error">
-          {error}
+      <AppShell>
+        <div className="mx-auto w-full max-w-xl px-4 pt-10">
+          <button
+            onClick={goBack}
+            className="mb-4 inline-flex items-center gap-1 rounded-[6px] py-1 pr-2 text-[15px] font-medium text-text-dim hover:text-text"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            Back
+          </button>
+          <StateMessage
+            title={copy.title}
+            onRetry={error === 'offline' || error === 'unavailable' ? retry : undefined}
+            showSavedLink={error === 'offline' || error === 'unavailable'}
+          >
+            {copy.body}
+          </StateMessage>
         </div>
-      </div>
+      </AppShell>
     )
   }
 
@@ -72,16 +104,14 @@ export function PlayerPage() {
       />
 
       {(isRomanizing || japaneseLoading) && (
-        <div className="flex items-center justify-center gap-2 border-b border-surface-alt py-2 text-xs text-text-dim">
+        <div role="status" className="flex items-center justify-center gap-2 border-b border-line py-2 text-[13px] text-text-dim">
           <div className="h-3 w-3 animate-spin rounded-full border border-primary border-t-transparent" />
-          {japaneseLoading
-            ? 'Loading Japanese dictionary...'
-            : 'Romanizing lyrics...'}
+          {japaneseLoading ? 'Loading the Japanese reading guide…' : 'Adding romanisation…'}
         </div>
       )}
 
       {party.isInParty && (
-        <div className="flex items-center justify-center gap-2 border-b border-surface-alt py-1.5 text-xs">
+        <div className="flex items-center justify-center gap-2 border-b border-line py-1.5 text-[13px]">
           <span className="text-primary">Room {party.roomCode}</span>
           <span className="text-text-dim">·</span>
           <span className="text-text-dim">{party.connectedCount} connected</span>
