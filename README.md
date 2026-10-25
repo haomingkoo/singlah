@@ -15,7 +15,6 @@ character.
 - Supports Chinese Pinyin, Japanese Romaji, and Korean romanization.
 - Provides playback speed, text-size, restart, pitch, and party-mode controls.
 - Saves songs for offline use as an installable progressive web app.
-- Runs Chromaprint fingerprinting in the browser through WebAssembly.
 
 ## Run locally
 
