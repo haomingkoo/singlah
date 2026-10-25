@@ -22,7 +22,7 @@ def client() -> TestClient:
 
 
 def create(client: TestClient, ip: str = "1.1.1.1") -> tuple[str, str]:
-    res = client.post("/rooms", headers={**ORIGIN, "x-forwarded-for": ip})
+    res = client.post("/rooms", headers={**ORIGIN, "x-real-ip": ip})
     assert res.status_code == 200
     body = res.json()
     return body["code"], body["hostToken"]
@@ -186,25 +186,25 @@ def test_room_creation_is_rate_limited_per_ip(client: TestClient) -> None:
     for _ in range(main.LIMITS["create"]):
         create(client, ip="2.2.2.2")
 
-    blocked = client.post("/rooms", headers={"x-forwarded-for": "2.2.2.2"})
-    other_ip = client.post("/rooms", headers={"x-forwarded-for": "3.3.3.3"})
+    blocked = client.post("/rooms", headers={"x-real-ip": "2.2.2.2"})
+    other_ip = client.post("/rooms", headers={"x-real-ip": "3.3.3.3"})
 
     assert blocked.status_code == 429
     assert other_ip.status_code == 200
 
 
 def test_lookup_is_rate_limited_per_ip(client: TestClient) -> None:
-    headers = {"x-forwarded-for": "4.4.4.4"}
+    headers = {"x-real-ip": "4.4.4.4"}
     for _ in range(main.LIMITS["lookup"]):
         assert client.get("/rooms/ABCDEF", headers=headers).status_code == 200
 
     assert client.get("/rooms/ABCDEF", headers=headers).status_code == 429
 
 
-def test_spoofed_forwarded_prefix_does_not_bypass_limit(client: TestClient) -> None:
+def test_spoofed_forwarded_for_does_not_bypass_limit(client: TestClient) -> None:
     for i in range(main.LIMITS["lookup"]):
-        client.get("/rooms/ABCDEF", headers={"x-forwarded-for": f"9.9.9.{i}, 5.5.5.5"})
+        client.get("/rooms/ABCDEF", headers={"x-forwarded-for": f"9.9.9.{i}", "x-real-ip": "5.5.5.5"})
 
-    res = client.get("/rooms/ABCDEF", headers={"x-forwarded-for": "8.8.8.8, 5.5.5.5"})
+    res = client.get("/rooms/ABCDEF", headers={"x-forwarded-for": "8.8.8.8", "x-real-ip": "5.5.5.5"})
 
     assert res.status_code == 429
