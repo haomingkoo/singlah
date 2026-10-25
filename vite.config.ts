@@ -3,11 +3,29 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import { copyFileSync, mkdirSync } from 'node:fs'
+
+// GitHub Pages has no SPA fallback. Copying index.html into each client route folder
+// makes /saved and /play?id= answer with HTTP 200 instead of the 404 page.
+const SPA_ROUTES = ['saved', 'play']
+function spaRouteCopies() {
+  return {
+    name: 'spa-route-copies',
+    apply: 'build' as const,
+    closeBundle() {
+      for (const route of SPA_ROUTES) {
+        mkdirSync(`dist/${route}`, { recursive: true })
+        copyFileSync('dist/index.html', `dist/${route}/index.html`)
+      }
+    },
+  }
+}
 
 export default defineConfig({
   base: '/',
   plugins: [
     react(),
+    spaRouteCopies(),
     tailwindcss(),
     nodePolyfills({
       include: ['path', 'buffer', 'process', 'stream', 'zlib'],
@@ -16,11 +34,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'SingLah — Karaoke Lyrics',
+        name: 'SingLah: karaoke lyrics with romanisation',
         short_name: 'SingLah',
-        description: 'Multilingual karaoke lyrics with romanization',
-        theme_color: '#0f172a',
-        background_color: '#0f172a',
+        description: 'Synced karaoke lyrics with romanisation',
+        theme_color: '#141119',
+        background_color: '#141119',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
@@ -37,6 +55,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        navigateFallbackDenylist: [/^\/(privacy|terms)(\/|$)/],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {

@@ -15,7 +15,8 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
   return (
     <div className="relative w-full">
       <svg
-        className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-dim"
+        aria-hidden="true"
+        className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-dim"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="none"
@@ -29,16 +30,18 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
       </svg>
       <input
         ref={inputRef}
-        type="text"
+        type="search"
+        aria-label="Search for a song"
+        enterKeyHint="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Search for a song..."
-        className="w-full rounded-xl border border-surface-alt bg-surface-alt py-3 pl-10 pr-10 text-lg text-text placeholder:text-text-dim focus:border-primary focus:outline-none"
+        placeholder="Song title or singer"
+        className="w-full appearance-none rounded-[10px] border border-line bg-surface-alt py-3 pl-10 pr-10 text-lg text-text placeholder:text-text-dim [&::-webkit-search-cancel-button]:hidden"
       />
       {value && (
         <button
           onClick={() => onChange('')}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-text-dim hover:text-text"
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-[6px] p-1 text-text-dim hover:text-text"
           aria-label="Clear search"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">

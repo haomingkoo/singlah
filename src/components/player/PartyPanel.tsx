@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ROOM_CODE_LENGTH, normalizeRoomCode, type PartyState } from '../../hooks/usePartyMode'
 
 interface PartyPanelProps {
@@ -14,12 +14,18 @@ interface PartyPanelProps {
 export function PartyPanel({ party, onClose }: PartyPanelProps) {
   const [joinCode, setJoinCode] = useState('')
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
   if (!party.backendAvailable) {
     return (
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50" onClick={onClose}>
-        <div className="w-full max-w-lg rounded-t-2xl bg-surface-alt p-6" onClick={(e) => e.stopPropagation()}>
-          <p className="text-center text-text-dim">Party mode is not configured yet.</p>
-          <button onClick={onClose} className="mt-4 w-full rounded-lg bg-surface-hover py-2 text-text-dim">
+        <div role="dialog" aria-modal="true" aria-label="Party mode" className="w-full max-w-lg rounded-t-[16px] bg-surface-alt p-6" onClick={(e) => e.stopPropagation()}>
+          <p className="text-center text-text-dim">Party mode isn't available right now.</p>
+          <button onClick={onClose} className="mt-4 w-full rounded-[6px] bg-surface-hover py-2 text-text-dim">
             Close
           </button>
         </div>
@@ -31,20 +37,20 @@ export function PartyPanel({ party, onClose }: PartyPanelProps) {
   if (party.isInParty) {
     return (
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50" onClick={onClose}>
-        <div className="w-full max-w-lg rounded-t-2xl bg-surface-alt p-6" onClick={(e) => e.stopPropagation()}>
-          <h3 className="mb-4 text-center text-lg font-semibold text-text">Party Mode</h3>
-          <div className="mb-4 rounded-xl bg-surface p-4 text-center">
-            <p className="text-xs text-text-dim">Room Code</p>
+        <div role="dialog" aria-modal="true" aria-label="Party mode" className="w-full max-w-lg rounded-t-[16px] bg-surface-alt p-6" onClick={(e) => e.stopPropagation()}>
+          <h3 className="mb-4 text-center text-lg font-semibold text-text">Party mode</h3>
+          <div className="mb-4 rounded-[10px] bg-surface p-4 text-center">
+            <p className="text-[13px] text-text-dim">Room code</p>
             <p className="text-4xl font-bold tracking-widest text-primary">{party.roomCode}</p>
-            <p className="mt-2 text-xs text-text-dim">
+            <p className="mt-2 text-[13px] text-text-dim">
               {party.connectedCount} connected · {party.isHost ? 'You are the host' : 'Synced to host'}
             </p>
           </div>
           <button
             onClick={() => { party.leaveRoom(); onClose() }}
-            className="w-full rounded-lg bg-error/20 py-3 text-sm font-medium text-error"
+            className="w-full rounded-[6px] bg-error/20 py-3 text-sm font-medium text-error"
           >
-            Leave Room
+            Leave room
           </button>
         </div>
       </div>
@@ -54,15 +60,15 @@ export function PartyPanel({ party, onClose }: PartyPanelProps) {
   // Not in a party
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50" onClick={onClose}>
-      <div className="w-full max-w-lg rounded-t-2xl bg-surface-alt p-6" onClick={(e) => e.stopPropagation()}>
-        <h3 className="mb-4 text-center text-lg font-semibold text-text">Party Mode</h3>
+      <div role="dialog" aria-modal="true" aria-label="Party mode" className="w-full max-w-lg rounded-t-[16px] bg-surface-alt p-6" onClick={(e) => e.stopPropagation()}>
+        <h3 className="mb-4 text-center text-lg font-semibold text-text">Party mode</h3>
 
         <button
           onClick={party.createRoom}
           disabled={party.status === 'connecting'}
-          className="mb-4 w-full rounded-lg bg-primary py-3 text-sm font-medium text-surface disabled:opacity-50"
+          className="mb-4 w-full rounded-[6px] bg-primary py-3 text-sm font-medium text-surface disabled:opacity-50"
         >
-          {party.status === 'connecting' ? 'Creating...' : 'Create Room'}
+          {party.status === 'connecting' ? 'Creating…' : 'Create a room'}
         </button>
 
         <div className="flex gap-2">
@@ -74,22 +80,23 @@ export function PartyPanel({ party, onClose }: PartyPanelProps) {
             value={joinCode}
             onChange={(e) => setJoinCode(normalizeRoomCode(e.target.value))}
             placeholder="Room code"
-            className="flex-1 rounded-lg bg-surface px-4 py-3 text-center text-lg tracking-widest text-text placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-primary"
+            aria-label="Room code"
+            className="flex-1 rounded-[6px] bg-surface px-4 py-3 text-center text-lg tracking-widest text-text placeholder:text-text-dim "
           />
           <button
             onClick={() => joinCode.length === ROOM_CODE_LENGTH && party.joinRoom(joinCode)}
             disabled={joinCode.length !== ROOM_CODE_LENGTH || party.status === 'connecting'}
-            className="rounded-lg bg-surface-hover px-6 py-3 text-sm font-medium text-text disabled:opacity-50"
+            className="rounded-[6px] bg-surface-hover px-6 py-3 text-sm font-medium text-text disabled:opacity-50"
           >
             Join
           </button>
         </div>
 
         {party.status === 'error' && (
-          <p className="mt-3 text-center text-sm text-error">Failed to connect. Check the room code.</p>
+          <p className="mt-3 text-center text-sm text-error">Couldn't join that room. Check the code and try again.</p>
         )}
 
-        <button onClick={onClose} className="mt-4 w-full rounded-lg py-2 text-sm text-text-dim">
+        <button onClick={onClose} className="mt-4 w-full rounded-[6px] py-2 text-sm text-text-dim">
           Cancel
         </button>
       </div>

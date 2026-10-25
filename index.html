@@ -3,13 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" href="/fonts/figtree-latin-normal.woff2" as="font" type="font/woff2" crossorigin />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0f172a" />
-    <meta name="description" content="Multilingual karaoke lyrics with romanization — Pinyin, Romaji, Korean" />
-    <title>SingLah</title>
+    <meta name="theme-color" content="#141119" />
+    <title>SingLah: karaoke lyrics with romanisation</title>
+    <meta name="description" content="Search a song and sing along with synced lyrics, with pinyin, romaji or Korean romanisation under every line." />
+    <link rel="canonical" href="https://singlah.kooexperience.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SingLah" />
+    <meta property="og:title" content="SingLah: karaoke lyrics with romanisation" />
+    <meta property="og:description" content="Synced lyrics with pinyin, romaji or Korean romanisation under every line." />
+    <meta property="og:url" content="https://singlah.kooexperience.com/" />
+    <meta property="og:image" content="https://singlah.kooexperience.com/og-card.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <script>
-      // GitHub Pages SPA redirect recovery
+      // Restores the path stashed by 404.html for old /play/<id> links.
       (function () {
         var redirect = sessionStorage.redirect;
         delete sessionStorage.redirect;

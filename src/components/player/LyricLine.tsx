@@ -19,19 +19,17 @@ export function LyricLine({
   const baseClass = cn(
     'px-4 py-3 text-center transition-all duration-300',
     isActive && 'scale-105',
-    isPast && 'opacity-40'
+    isPast && 'opacity-70'
   )
 
   const textColor = cn(
-    'text-2xl font-medium leading-snug transition-colors duration-300',
-    isActive
-      ? 'text-primary drop-shadow-[0_0_8px_rgba(56,189,248,0.5)]'
-      : 'text-text'
+    'text-[26px] font-medium leading-snug transition-colors duration-300 md:text-[32px]',
+    isActive ? 'text-primary' : 'text-text'
   )
 
   const subColor = cn(
     'mt-1 text-base leading-snug transition-colors duration-300',
-    isActive ? 'text-primary/70' : 'text-text-dim'
+    isActive ? 'text-primary' : 'text-text-dim'
   )
 
   const handleTokenClick = (
