@@ -7,6 +7,7 @@ import { useOfflineSongs } from '../hooks/useOfflineSongs'
 import { useDisplayMode } from '../hooks/useDisplayMode'
 import { usePitchDetection } from '../hooks/usePitchDetection'
 import { usePartyMode } from '../hooks/usePartyMode'
+import { usePartySync } from '../hooks/usePartySync'
 import { SongHeader } from '../components/player/SongHeader'
 import { LyricsScroller } from '../components/player/LyricsScroller'
 import { PlayerControls } from '../components/player/PlayerControls'
@@ -31,6 +32,7 @@ export function PlayerPage() {
   const [pitchEnabled, setPitchEnabled] = useState(false)
   const { pitchData } = usePitchDetection(pitchEnabled)
   const party = usePartyMode()
+  const partySync = usePartySync(party, sync, id, lines)
   const [showPartyPanel, setShowPartyPanel] = useState(false)
 
   const handleToggleSave = async () => {
@@ -137,7 +139,10 @@ export function PlayerPage() {
         pitchEnabled={pitchEnabled}
         partyActive={party.isInParty}
         onTogglePlay={sync.togglePlay}
-        onSeek={sync.seek}
+        onSeek={(time) => {
+          sync.seek(time)
+          partySync.broadcast()
+        }}
         onSetPlaybackRate={sync.setPlaybackRate}
         onCycleDisplayMode={cycleDisplayMode}
         onTogglePitch={() => setPitchEnabled((p) => !p)}

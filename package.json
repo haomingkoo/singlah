@@ -8,12 +8,14 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "postinstall": "node scripts/copy-dict.js"
+    "postinstall": "node scripts/copy-dict.js",
+    "test:e2e": "VITE_PARTY_BACKEND_URL=http://127.0.0.1:8791 npm run build && playwright test"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
-    "aromanize": "^0.1.5",
     "clsx": "^2.1.1",
+    "es-hangul": "^2.4.0",
+    "fflate": "^0.8.3",
     "kuroshiro": "^1.2.0",
     "kuroshiro-analyzer-kuromoji": "^1.1.0",
     "pinyin-pro": "^3.28.0",
@@ -28,6 +30,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.58.2",
     "@types/node": "^24.12.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
