@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { copyFileSync, mkdirSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 
 // GitHub Pages has no SPA fallback. Copying index.html into each client route folder
 // makes /saved and /play?id= answer with HTTP 200 instead of the 404 page.
@@ -23,6 +24,11 @@ function spaRouteCopies() {
 
 export default defineConfig({
   base: '/',
+  resolve: {
+    alias: {
+      'zlibjs/bin/gunzip.min.js': fileURLToPath(new URL('./src/lib/romanizer/gunzipShim.ts', import.meta.url)),
+    },
+  },
   plugins: [
     react(),
     spaRouteCopies(),
