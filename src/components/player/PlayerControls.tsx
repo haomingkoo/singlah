@@ -137,6 +137,11 @@ export function PlayerControls({
           <PartyIcon />
         </button>
       </div>
+      <p className="text-center text-[12px] text-text-dim">
+        <a className="underline decoration-text-dim/50 underline-offset-2 hover:text-text" href="https://kooexperience.com">
+          More projects → kooexperience.com
+        </a>
+      </p>
     </div>
   )
 }
