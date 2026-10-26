@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import type { TimedLine, SyncState } from '../types'
 
 function binarySearchLine(lines: TimedLine[], time: number): number {
@@ -31,6 +31,7 @@ export function useKaraokeSync(lines: TimedLine[], duration: number) {
   const playbackRateRef = useRef(1.0)
   const lastLineRef = useRef(-1)
   const lastUpdateRef = useRef(0)
+  const isPlayingRef = useRef(false)
 
   const tick = useCallback(() => {
     const now = performance.now()
@@ -40,6 +41,7 @@ export function useKaraokeSync(lines: TimedLine[], duration: number) {
 
     // Auto-pause at end of song
     if (elapsed >= duration + 3) {
+      isPlayingRef.current = false
       offsetRef.current = 0
       startTimeRef.current = performance.now()
       setState((prev) => ({
@@ -72,12 +74,16 @@ export function useKaraokeSync(lines: TimedLine[], duration: number) {
   }, [lines, duration])
 
   const play = useCallback(() => {
+    if (isPlayingRef.current) return
+    isPlayingRef.current = true
     startTimeRef.current = performance.now()
     setState((prev) => ({ ...prev, isPlaying: true }))
     rafIdRef.current = requestAnimationFrame(tick)
   }, [tick])
 
   const pause = useCallback(() => {
+    if (!isPlayingRef.current) return
+    isPlayingRef.current = false
     cancelAnimationFrame(rafIdRef.current)
     const now = performance.now()
     offsetRef.current +=
@@ -103,7 +109,7 @@ export function useKaraokeSync(lines: TimedLine[], duration: number) {
 
   const setPlaybackRate = useCallback(
     (rate: number) => {
-      if (state.isPlaying) {
+      if (isPlayingRef.current) {
         const now = performance.now()
         offsetRef.current +=
           ((now - startTimeRef.current) / 1000) * playbackRateRef.current
@@ -112,8 +118,20 @@ export function useKaraokeSync(lines: TimedLine[], duration: number) {
       playbackRateRef.current = rate
       setState((prev) => ({ ...prev, playbackRate: rate }))
     },
-    [state.isPlaying]
+    []
   )
+
+  // Read from refs so callers get the position right after play/pause/seek, before React re-renders.
+  const getPosition = useCallback(() => {
+    const running = isPlayingRef.current
+      ? ((performance.now() - startTimeRef.current) / 1000) * playbackRateRef.current
+      : 0
+    return {
+      elapsed: offsetRef.current + running,
+      isPlaying: isPlayingRef.current,
+      playbackRate: playbackRateRef.current,
+    }
+  }, [])
 
   const togglePlay = useCallback(() => {
     if (state.isPlaying) {
@@ -127,8 +145,10 @@ export function useKaraokeSync(lines: TimedLine[], duration: number) {
     return () => cancelAnimationFrame(rafIdRef.current)
   }, [])
 
-  // Reset when lines change
+  // Reset on a new song, not when romanisation swaps in the same lines.
+  const timingKey = useMemo(() => lines.map((l) => l.time).join(','), [lines])
   useEffect(() => {
+    isPlayingRef.current = false
     cancelAnimationFrame(rafIdRef.current)
     offsetRef.current = 0
     startTimeRef.current = performance.now()
@@ -139,7 +159,7 @@ export function useKaraokeSync(lines: TimedLine[], duration: number) {
       isPlaying: false,
       playbackRate: playbackRateRef.current,
     })
-  }, [lines])
+  }, [timingKey])
 
-  return { ...state, play, pause, seek, setPlaybackRate, togglePlay }
+  return { ...state, play, pause, seek, setPlaybackRate, togglePlay, getPosition }
 }

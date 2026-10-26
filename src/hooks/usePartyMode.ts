@@ -123,6 +123,7 @@ export function usePartyMode() {
           setState((s) => ({ ...s, connectedCount: Number(data.count) }))
         })
 
+        socket.on('sync', (data) => syncHandlerRef.current?.(data))
         socket.on('room_closed', () => cleanup())
         socket.on('close', () => cleanup())
 
@@ -145,14 +146,10 @@ export function usePartyMode() {
     []
   )
 
+  // The socket forwards to whichever handler is current, so registering before joining works.
   const onSyncReceived = useCallback(
-    (handler: (data: Record<string, unknown>) => void) => {
-      // Remove old handler
-      if (syncHandlerRef.current && socketRef.current) {
-        socketRef.current.off('sync', syncHandlerRef.current)
-      }
+    (handler: ((data: Record<string, unknown>) => void) | null) => {
       syncHandlerRef.current = handler
-      socketRef.current?.on('sync', handler)
     },
     []
   )

@@ -20,6 +20,8 @@ export function useRomanizer(lines: TimedLine[]) {
     prevLinesRef.current = lines
 
     let cancelled = false
+    // Show the new song's lines at once; romanisation fills in when ready.
+    setRomanizedLines(lines)
     const run = async () => {
       setIsRomanizing(true)
 

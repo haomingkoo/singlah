@@ -58,6 +58,7 @@ class Room:
         self.host: WebSocket | None = None
         self.clients: set[WebSocket] = set()
         self.state: dict[str, Any] = {}
+        self.state_at: float = 0.0
         self.last_activity: float = time.time()
 
     @property
@@ -188,7 +189,9 @@ async def run_host(ws: WebSocket, code: str, room: Room) -> None:
                 msg = HostMessage.model_validate(data)
             except ValidationError:
                 continue
-            await broadcast(room, msg.model_dump())
+            room.state = msg.data.model_dump()
+            room.state_at = time.monotonic()
+            await broadcast(room, {"type": "sync", "data": room.state})
             await broadcast(room, {"type": "count", "data": {"count": room.count}})
     except WebSocketDisconnect:
         pass
@@ -200,6 +203,14 @@ async def run_host(ws: WebSocket, code: str, room: Room) -> None:
             except Exception:
                 pass
         rooms.pop(code, None)
+
+
+def current_state(room: Room) -> dict[str, Any]:
+    """Last host state, with elapsed advanced to now while playing."""
+    state = dict(room.state)
+    if state.get("isPlaying"):
+        state["elapsed"] += (time.monotonic() - room.state_at) * state["playbackRate"]
+    return state
 
 
 async def notify_host_count(room: Room) -> None:
@@ -215,7 +226,7 @@ async def run_client(ws: WebSocket, code: str, room: Room) -> None:
     room.last_activity = time.time()
     await ws.send_json({"type": "room_joined", "data": {"code": code, "isHost": False, "count": room.count}})
     if room.state:
-        await ws.send_json({"type": "sync", "data": room.state})
+        await ws.send_json({"type": "sync", "data": current_state(room)})
     await notify_host_count(room)
     try:
         # Participants only receive; request_state is the one message they may send.
@@ -225,7 +236,7 @@ async def run_client(ws: WebSocket, code: str, room: Room) -> None:
                 await ws.close(code=CLOSE_POLICY)
                 break
             if room.state:
-                await ws.send_json({"type": "sync", "data": room.state})
+                await ws.send_json({"type": "sync", "data": current_state(room)})
     except WebSocketDisconnect:
         pass
     finally:

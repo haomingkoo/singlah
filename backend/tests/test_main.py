@@ -71,6 +71,47 @@ def test_host_with_token_relays_sync_to_participant(client: TestClient) -> None:
             assert guest.receive_json() == SYNC
 
 
+def test_late_joiner_gets_paused_state_unchanged(client: TestClient) -> None:
+    code, token = create(client)
+    paused = {"type": "sync", "data": {**SYNC["data"], "isPlaying": False}}
+
+    with client.websocket_connect(f"/ws/{code}?role=host", headers=ORIGIN) as host:
+        host.send_json({"type": "auth", "data": {"token": token}})
+        host.receive_json()
+        with client.websocket_connect(f"/ws/{code}?role=client", headers=ORIGIN) as first:
+            first.receive_json()
+            host.send_json(paused)
+            assert first.receive_json() == paused
+            with client.websocket_connect(f"/ws/{code}?role=client", headers=ORIGIN) as late:
+                late.receive_json()
+
+                assert late.receive_json() == paused
+
+
+def test_late_joiner_gets_elapsed_advanced_while_playing(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    code, token = create(client)
+    clock = [100.0]
+    monkeypatch.setattr(main.time, "monotonic", lambda: clock[0])
+    fast = {"type": "sync", "data": {**SYNC["data"], "playbackRate": 1.5}}
+
+    with client.websocket_connect(f"/ws/{code}?role=host", headers=ORIGIN) as host:
+        host.send_json({"type": "auth", "data": {"token": token}})
+        host.receive_json()
+        with client.websocket_connect(f"/ws/{code}?role=client", headers=ORIGIN) as first:
+            first.receive_json()
+            host.send_json(fast)
+            assert first.receive_json() == fast  # state is stored once relayed
+            clock[0] = 104.0
+            with client.websocket_connect(f"/ws/{code}?role=client", headers=ORIGIN) as late:
+                late.receive_json()
+
+                assert late.receive_json()["data"]["elapsed"] == pytest.approx(2.5 + 4 * 1.5)
+                late.send_json({"type": "request_state"})
+                assert late.receive_json()["data"]["elapsed"] == pytest.approx(8.5)
+
+
 def test_second_host_with_valid_token_cannot_replace_host(client: TestClient) -> None:
     code, token = create(client)
 
