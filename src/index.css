@@ -83,6 +83,27 @@ input {
   font-variant-numeric: tabular-nums;
 }
 
+.tour-dialog::backdrop {
+  background: rgb(10 8 13 / 0.8);
+}
+
+.tour-dialog[open] {
+  animation: tour-in 160ms ease-out;
+}
+
+@keyframes tour-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-dialog[open] {
+    animation: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
