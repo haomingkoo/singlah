@@ -1,6 +1,7 @@
 import { SearchBar } from '../components/search/SearchBar'
 import { SearchResults } from '../components/search/SearchResults'
 import { useSearch } from '../hooks/useSearch'
+import { TourDialog } from '../components/TourDialog'
 
 // Each query returns synced lyrics from LRCLib (checked Oct 2026).
 const EXAMPLES = [
@@ -18,10 +19,13 @@ export function SearchPage() {
       <h1 className="text-[28px] font-bold leading-tight tracking-tight text-text [text-wrap:balance] md:text-[40px]">
         Sing it, even if you can't read it.
       </h1>
-      <p className="mb-6 mt-2 text-[15px] leading-relaxed text-text-dim md:text-lg">
+      <p className="mb-3 mt-2 text-[15px] leading-relaxed text-text-dim md:text-lg">
         Search a song to get synced lyrics with pinyin, romaji or Korean romanisation under every
         line.
       </p>
+      <div className="mb-6 flex">
+        <TourDialog />
+      </div>
       <SearchBar value={query} onChange={search} />
 
       {!hasQuery && (
